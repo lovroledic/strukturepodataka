@@ -1,2 +1,1 @@
 # strukturepodataka
-test
