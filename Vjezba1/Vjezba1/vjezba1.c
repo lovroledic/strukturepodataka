@@ -9,6 +9,7 @@
 
 #define MAX_SIZE 50
 #define MAX_LINE 1024
+#define MAX_POINTS 15
 #define FILE_ERROR_OPEN -1
 
 typedef struct _student {
@@ -43,6 +44,8 @@ int main() {
 	int noRows = 0;
 	noRows = readNoRowsInFile();
 	printf("%d", noRows);
-
+	if (noRows > 0) {
+		
+	}
 	return 0;
 }
