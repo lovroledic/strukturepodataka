@@ -1,0 +1,4 @@
+﻿  vjezba1.c
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba1\Vjezba1\vjezba1.c(63,11): warning C4129: '%': unrecognized character escape sequence
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba1\Vjezba1\vjezba1.c(63,11): warning C4778: 'printf' : unterminated format string '%\n'
+  Vjezba1.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba1\x64\Debug\Vjezba1.exe

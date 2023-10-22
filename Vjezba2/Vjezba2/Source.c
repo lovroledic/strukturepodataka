@@ -1,35 +1,68 @@
-#include<stdio.h>
+//Definirati strukturu osoba(ime, prezime, godina roðenja) i napisati program koji :
+//A.dinamièki dodaje novi element na poèetak liste,
+//B.ispisuje listu,
+//C.dinamièki dodaje novi element na kraj liste,
+//D.pronalazi element u listi(po prezimenu),
+//E.briše odreðeni element iz liste,
+//U zadatku se ne smiju koristiti globalne varijable.
+
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define MAX_SIZE 50
 #define EXIT_SUCCESS 0
 
 struct _person;
 typedef struct _person* Position;
+
 typedef struct _person {
 	char name[MAX_SIZE];
 	char surname[MAX_SIZE];
 	int birthYear;
 	Position next;
-} person;
+} Person;
+
+Position createPerson();
+int addToFrontOfTheList(Position head);
+int addToEndOfTheList(Position head);
+int printList(Position current);
 
 void main() {
-	person head = { .next = NULL,.name = {0},
-					.surname = {0},.birthYear = 0 };
 
+	Person head = { .next = NULL,.name = {0}, .surname = {0}, .birthYear = 0 };
 
-	
+	addToFrontOfTheList(&head);
+	addToFrontOfTheList(&head);
+	addToEndOfTheList(&head);
+
+	printList(head.next);
+
+	return EXIT_SUCCESS;
 }
 
-int menu(Position head) {
-	char choice = '\0';
-	Position person = NULL;
-	while (1) {
+Position createPerson() {
+	Position person;
+	person = (Position)malloc(sizeof(Person));
 
-	}
+	printf("Unesi ime: ");
+	scanf(" %s", person->name);
+
+	printf("Unesi prezime: ");
+	scanf(" %s", person->surname);
+
+	printf("Unesi godinu rodenja: ");
+	scanf(" %d", &person->birthYear);
+
+	return person;
 }
 
 int addToFrontOfTheList(Position head) {
-	Position newPerson = NULL;
+	Position newPerson;
 
+	printf("\nUnos na pocetak:\n");
 	newPerson = createPerson();
 
 	if (newPerson) {
@@ -41,36 +74,32 @@ int addToFrontOfTheList(Position head) {
 }
 
 int addToEndOfTheList(Position head) {
-	Position newPerson = NULL;
-	Position last = NULL;
+	Position newPerson;
 
+	printf("\nUnos na kraj:\n");
 	newPerson = createPerson();
 
 	if (newPerson) {
-		last = findLast(head);
-		newPerson->next = last->next;
-		last->next = newPerson;
+
+		while (head->next != NULL) {
+			head = head->next;
+		}
+
+		newPerson->next = head->next;
+		head->next = newPerson;
 	}
 
 	return EXIT_SUCCESS;
 }
 
-Position findLast(Position head) {
-	Position current = head;
-
-	while (current->next != NULL) {
-		current = current->next;
-	}
-
-	return current;
-}
-
-int printList(Position firstElement) {
-	Position current = firstElement;
-	if (!firstElement)
+int printList(Position current) {
+	
+	printf("\nIspis:\n");
+	if (!current)
 		printf("Empty list!\n");
 	for (; current != NULL; current = current->next) {
-		// printf("
-		printPerson(current);
+		printf("%s %s, roden(a) %d. godine\n", current->name, current->surname, current->birthYear);
 	}
+
+	return EXIT_SUCCESS;
 }
