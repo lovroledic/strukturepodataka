@@ -13,6 +13,7 @@
 #define MAX_SIZE 50
 #define MAX_LINE 1024
 #define MAX_POINTS 15
+#define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
 
 typedef struct _student {
@@ -23,7 +24,7 @@ typedef struct _student {
 
 int readNoRowsInFile() {
 	int counter = 0;
-	FILE* filePointer;
+	FILE* filePointer = NULL;
 	char buffer[MAX_LINE] = { 0 };
 
 	filePointer = fopen("students.txt", "r");
@@ -49,11 +50,16 @@ int main() {
 
 	if (noRows > 0) {
 
-		FILE* filePointer;
+		FILE* filePointer = NULL;
 		filePointer = fopen("students.txt", "r");
 
 		Student* stud;
 		stud = (Student*)malloc(noRows * sizeof(Student));
+
+		if (stud == NULL) {
+			printf("Error. File not opened.\n");
+			return FILE_ERROR_OPEN;
+		}
 
 		for (i = 0; i < noRows; i++) {
 			fscanf(filePointer, " %s %s %lf ", stud[i].name, stud[i].surname, &stud[i].points);
@@ -64,7 +70,8 @@ int main() {
 		}
 
 		fclose(filePointer);
+		free(stud);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
