@@ -40,6 +40,10 @@ void main() {
 
 	printList(head.next);
 
+	// person ? printPerson() : print(ne postoji)
+
+	// 3.c ne treba! nece bit na kolokviju (jedino moze bit sortirani unos)
+
 	return EXIT_SUCCESS;
 }
 
@@ -102,4 +106,8 @@ int printList(Position current) {
 	}
 
 	return EXIT_SUCCESS;
+}
+
+Person findPerson(Position current) {
+
 }
