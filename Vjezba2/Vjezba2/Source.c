@@ -29,15 +29,26 @@ Position createPerson();
 int addToFrontOfTheList(Position head);
 int addToEndOfTheList(Position head);
 int printList(Position current);
+Position findPerson(Position current, char* surname);
+int printPerson(Position person);
+int deletePerson(Position head, char* surname);
 
 void main() {
 
+	char surname[MAX_SIZE];
 	Person head = { .next = NULL,.name = {0}, .surname = {0}, .birthYear = 0 };
 
 	addToFrontOfTheList(&head);
 	addToFrontOfTheList(&head);
 	addToEndOfTheList(&head);
 
+	printList(head.next);
+
+	printf("\nUnesi prezime koje zelis pronaci: ");
+	scanf(" %s", surname);
+	findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("Osoba ne postoji\n");
+
+	deletePerson(&head, surname);
 	printList(head.next);
 
 	// person ? printPerson() : print(ne postoji)
@@ -101,13 +112,43 @@ int printList(Position current) {
 	printf("\nIspis:\n");
 	if (!current)
 		printf("Empty list!\n");
-	for (; current != NULL; current = current->next) {
-		printf("%s %s, roden(a) %d. godine\n", current->name, current->surname, current->birthYear);
-	}
+	for (; current != NULL; current = current->next)
+		printPerson(current);
+	
+	return EXIT_SUCCESS;
+}
+
+Position findPerson(Position current, char* sur)
+{
+	while (current != NULL && strcmp(current->surname, sur))
+		current = current->next;
+
+	return current;
+}
+
+int printPerson(Position person)
+{
+	printf("%s %s, roden(a) %d. godine\n", person->name, person->surname, person->birthYear);
 
 	return EXIT_SUCCESS;
 }
 
-Person findPerson(Position current) {
 
+int deletePerson(Position p, char* sur)
+{
+	Position temp;
+	temp = (Position)malloc(sizeof(Person));
+
+	// postavlja p na prethodnika elementa kojeg želimo izbrisati
+	while (p->next != NULL && strcmp(p->next->surname, sur))
+		p = p->next;
+
+	if (p->next != NULL)
+	{
+		temp = p->next;
+		p->next = temp->next;
+		free(temp);
+	}
+
+	return EXIT_SUCCESS;
 }
