@@ -1,10 +1,17 @@
-//Definirati strukturu osoba(ime, prezime, godina roðenja) i napisati program koji :
+//2. Definirati strukturu osoba(ime, prezime, godina roðenja) i napisati program koji :
 //A.dinamièki dodaje novi element na poèetak liste,
 //B.ispisuje listu,
 //C.dinamièki dodaje novi element na kraj liste,
 //D.pronalazi element u listi(po prezimenu),
 //E.briše odreðeni element iz liste,
 //U zadatku se ne smiju koristiti globalne varijable.
+
+//3. Prethodnom zadatku dodati funkcije :
+//A.dinamièki dodaje novi element iza odreðenog elementa,
+//B.dinamièki dodaje novi element ispred odreðenog elementa,
+//C.sortira listu po prezimenima osoba, ( OVO NE )
+//D.upisuje listu u datoteku,
+//E.èita listu iz datoteke.
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -32,6 +39,8 @@ int printList(Position current);
 Position findPerson(Position current, char* surname);
 int printPerson(Position person);
 int deletePerson(Position head, char* surname);
+int addAfter(Position current, Position person);
+int addBefore(Position current, Position person);
 
 void main() {
 
@@ -49,6 +58,16 @@ void main() {
 	findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("Osoba ne postoji\n");
 
 	deletePerson(&head, surname);
+	printList(head.next);
+
+	printf("\nUnesi prezime ispred kojeg zelis umetnuti osobu: ");
+	scanf(" %s", surname);
+	addBefore(&head, surname);
+	printList(head.next);
+	
+	printf("\nUnesi prezime iza kojeg zelis umetnuti osobu: ");
+	scanf(" %s", surname);
+	addAfter(&head, surname);
 	printList(head.next);
 
 	// person ? printPerson() : print(ne postoji)
@@ -149,6 +168,38 @@ int deletePerson(Position p, char* sur)
 		p->next = temp->next;
 		free(temp);
 	}
+
+	return EXIT_SUCCESS;
+}
+
+int addAfter(Position current, char* sur)
+{
+	Position newPerson;
+
+	printf("\nUnos iza %s:\n", sur);
+	newPerson = createPerson();
+
+	current = findPerson(current, sur);
+
+	newPerson->next = current->next;
+	current->next = newPerson;
+
+	return EXIT_SUCCESS;
+}
+
+
+int addBefore(Position current, char* sur)
+{
+	Position newPerson;
+
+	printf("\nUnos prije %s:\n", sur);
+	newPerson = createPerson();
+
+	while (current->next != NULL && strcmp(current->next->surname, sur))
+		current = current->next;
+
+	newPerson->next = current->next;
+	current->next = newPerson;
 
 	return EXIT_SUCCESS;
 }
