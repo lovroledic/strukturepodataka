@@ -1,0 +1,3 @@
+a a, roden(a) 1. godine
+b b, roden(a) 2. godine
+c c, roden(a) 3. godine

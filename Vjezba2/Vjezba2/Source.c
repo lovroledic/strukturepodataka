@@ -19,8 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX_LINE 1024
 #define MAX_SIZE 50
 #define EXIT_SUCCESS 0
+#define FILE_ERROR_OPEN -1
 
 struct _person;
 typedef struct _person* Position;
@@ -33,70 +35,108 @@ typedef struct _person {
 } Person;
 
 Position createPerson();
-int addToFrontOfTheList(Position head);
-int addToEndOfTheList(Position head);
-int printList(Position current);
-Position findPerson(Position current, char* surname);
-int printPerson(Position person);
-int deletePerson(Position head, char* surname);
-int addAfter(Position current, Position person);
-int addBefore(Position current, Position person);
+int addToFrontOfTheList(Position);
+int addToEndOfTheList(Position);
+int printList(Position);
+Position findPerson(Position, char*);
+int printPerson(Position);
+int deletePerson(Position, char*);
+int addAfter(Position, Position);
+int addBefore(Position, Position);
+int fileWrite(Position);
+int fileRead();
 
 void main() {
 
+	char in;
+	FILE* filePointer = NULL;
+
 	char surname[MAX_SIZE];
-	Person head = { .next = NULL,.name = {0}, .surname = {0}, .birthYear = 0 };
+	Person head = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 };
+	Person headR = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 };
 
-	addToFrontOfTheList(&head);
-	addToFrontOfTheList(&head);
-	addToEndOfTheList(&head);
+	printf("f - add person to front of the list\ne - add person to end of the list\na - add person after person with surname\nb - add person before person with surname\np - print list\ns - find person with surname\nd - delete person with surname\nw - write list into file\nr - read list from file\n");
 
-	printList(head.next);
+	do
+	{
+		printf("\nChoose action: ");
+		scanf(" %c", &in);
+		getchar();
 
-	printf("\nUnesi prezime koje zelis pronaci: ");
-	scanf(" %s", surname);
-	findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("Osoba ne postoji\n");
-
-	deletePerson(&head, surname);
-	printList(head.next);
-
-	printf("\nUnesi prezime ispred kojeg zelis umetnuti osobu: ");
-	scanf(" %s", surname);
-	addBefore(&head, surname);
-	printList(head.next);
-	
-	printf("\nUnesi prezime iza kojeg zelis umetnuti osobu: ");
-	scanf(" %s", surname);
-	addAfter(&head, surname);
-	printList(head.next);
-
-	// person ? printPerson() : print(ne postoji)
-
-	// 3.c ne treba! nece bit na kolokviju (jedino moze bit sortirani unos)
+		switch (in)
+		{
+			case 'f':
+				printf("Add to front of the list\n");
+				addToFrontOfTheList(&head);
+				break;
+			case 'e':
+				printf("Add to end of the list\n");
+				addToEndOfTheList(&head);
+				break;
+			case 'a':
+				printf("Add after person with surname: ");
+				scanf(" %s", surname);
+				addAfter(&head, surname);
+				break;
+			case 'b':
+				printf("Add before person with surname: ");
+				scanf(" %s", surname);
+				addBefore(&head, surname);
+				break;
+			case 'p':
+				printf("Printing list:\n");
+				printList(head.next);
+				break;
+			case 's':
+				printf("Find person with surname: ");
+				scanf(" %s", surname);
+				findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("\tPerson does not exist.\n");
+				break;
+			case 'd':
+				printf("Delete person with surname: ");
+				scanf(" %s", surname);
+				deletePerson(&head, surname);
+				break;
+			case 'w':
+				printf("Writing list into file...\n");
+				fileWrite(head.next);
+				break;
+			case 'r':
+				printf("Reading list from file:\n");
+				fileRead();
+				break;
+			case '0':
+				// End program
+				break;
+			default:
+				printf("\nInvalid input. Try again.\n");
+				break;
+		}
+	} while (in != '0');
 
 	return EXIT_SUCCESS;
 }
 
-Position createPerson() {
+Position createPerson()
+{
 	Position person;
 	person = (Position)malloc(sizeof(Person));
 
-	printf("Unesi ime: ");
+	printf("\tName: ");
 	scanf(" %s", person->name);
 
-	printf("Unesi prezime: ");
+	printf("\tSurname: ");
 	scanf(" %s", person->surname);
 
-	printf("Unesi godinu rodenja: ");
+	printf("\tBirth year: ");
 	scanf(" %d", &person->birthYear);
 
 	return person;
 }
 
-int addToFrontOfTheList(Position head) {
+int addToFrontOfTheList(Position head)
+{
 	Position newPerson;
-
-	printf("\nUnos na pocetak:\n");
 	newPerson = createPerson();
 
 	if (newPerson) {
@@ -107,10 +147,9 @@ int addToFrontOfTheList(Position head) {
 	return EXIT_SUCCESS;
 }
 
-int addToEndOfTheList(Position head) {
+int addToEndOfTheList(Position head)
+{
 	Position newPerson;
-
-	printf("\nUnos na kraj:\n");
 	newPerson = createPerson();
 
 	if (newPerson) {
@@ -126,32 +165,44 @@ int addToEndOfTheList(Position head) {
 	return EXIT_SUCCESS;
 }
 
-int printList(Position current) {
-	
-	printf("\nIspis:\n");
-	if (!current)
-		printf("Empty list!\n");
-	for (; current != NULL; current = current->next)
-		printPerson(current);
+int printList(Position p)
+{
+	if (!p)
+		printf("\tEmpty list!\n");
+
+	while (p != NULL)
+	{
+		printPerson(p);
+		p = p->next;
+	}
 	
 	return EXIT_SUCCESS;
 }
 
-Position findPerson(Position current, char* sur)
+Position findPerson(Position p, char* sur)
 {
-	while (current != NULL && strcmp(current->surname, sur))
-		current = current->next;
+	while (p != NULL && strcmp(p->surname, sur))
+		p = p->next;
 
-	return current;
+	return p;
 }
 
-int printPerson(Position person)
+Position findPersonPrev(Position p, char* sur)
 {
-	printf("%s %s, roden(a) %d. godine\n", person->name, person->surname, person->birthYear);
+	while (p->next != NULL && strcmp(p->next->surname, sur))
+		p = p->next;
+
+	if (p->next == NULL) return NULL;
+
+	return p;
+}
+
+int printPerson(Position p)
+{
+	printf("\t%s %s, roden(a) %d. godine\n", p->name, p->surname, p->birthYear);
 
 	return EXIT_SUCCESS;
 }
-
 
 int deletePerson(Position p, char* sur)
 {
@@ -172,34 +223,86 @@ int deletePerson(Position p, char* sur)
 	return EXIT_SUCCESS;
 }
 
-int addAfter(Position current, char* sur)
+int addAfter(Position p, char* sur)
 {
 	Position newPerson;
 
-	printf("\nUnos iza %s:\n", sur);
-	newPerson = createPerson();
+	p = findPerson(p, sur);
 
-	current = findPerson(current, sur);
+	if (p)
+	{
+		newPerson = createPerson();
 
-	newPerson->next = current->next;
-	current->next = newPerson;
+		newPerson->next = p->next;
+		p->next = newPerson;
+	}
+	else printf("\tPerson with surname '%s' was not found.\n", sur);
 
 	return EXIT_SUCCESS;
 }
 
-
-int addBefore(Position current, char* sur)
+int addBefore(Position p, char* sur)
 {
 	Position newPerson;
 
-	printf("\nUnos prije %s:\n", sur);
-	newPerson = createPerson();
+	p = findPersonPrev(p, sur);
+	
+	if (p)
+	{
+		newPerson = createPerson();
 
-	while (current->next != NULL && strcmp(current->next->surname, sur))
-		current = current->next;
+		newPerson->next = p->next;
+		p->next = newPerson;
+	}
+	else printf("\tPerson with surname '%s' was not found.\n", sur);
+	
+	return EXIT_SUCCESS;
+}
 
-	newPerson->next = current->next;
-	current->next = newPerson;
+int fileWrite(Position p)
+{
+	FILE* fp = NULL;
+	fp = fopen("persons.txt", "w");
+
+	if (fp == NULL)
+	{
+		printf("\nFile could not be opened.\n");
+		return FILE_ERROR_OPEN;
+	}
+
+	while (p != NULL)
+	{
+		fprintf(fp, "%s %s, roden(a) %d. godine\n", p->name, p->surname, p->birthYear);
+		p = p->next;
+	}
+
+	fclose(fp);
+
+	printf("\tSuccess!\n");
+
+	return EXIT_SUCCESS;
+}
+
+int fileRead()
+{
+	char c;
+	FILE* fp = NULL;
+	fp = fopen("persons.txt", "r");
+
+	if (fp == NULL)
+	{
+		printf("File could not be opened.\n");
+		return FILE_ERROR_OPEN;
+	}
+
+	c = getc(fp);
+	while (c != EOF)
+	{
+		printf("%c", c);
+		c = getc(fp);
+	}
+		
+	fclose(fp);
 
 	return EXIT_SUCCESS;
 }

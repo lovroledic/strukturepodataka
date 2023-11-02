@@ -1,7 +1,7 @@
 ﻿  Source.c
-C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(65,26): warning C4133: 'function': incompatible types - from 'char [50]' to 'Position'
-C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(70,25): warning C4133: 'function': incompatible types - from 'char [50]' to 'Position'
-C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(77,2): warning C4098: 'main': 'void' function returning a value
-C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(175,38): warning C4028: formal parameter 2 different from declaration
-C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(191,39): warning C4028: formal parameter 2 different from declaration
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(79,28): warning C4133: 'function': incompatible types - from 'char [50]' to 'Position'
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(84,29): warning C4133: 'function': incompatible types - from 'char [50]' to 'Position'
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(117,2): warning C4098: 'main': 'void' function returning a value
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(226,32): warning C4028: formal parameter 2 different from declaration
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\Vjezba2\Source.c(244,33): warning C4028: formal parameter 2 different from declaration
   Vjezba2.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba2\x64\Debug\Vjezba2.exe
