@@ -41,10 +41,12 @@ int printList(Position);
 Position findPerson(Position, char*);
 int printPerson(Position);
 int deletePerson(Position, char*);
+int deleteList(Position);
 int addAfter(Position, Position);
 int addBefore(Position, Position);
 int fileWrite(Position);
-int fileRead();
+int _fileRead();
+int fileRead(Position);
 
 void main() {
 
@@ -90,7 +92,7 @@ void main() {
 			case 's':
 				printf("Find person with surname: ");
 				scanf(" %s", surname);
-				findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("\tPerson does not exist.\n");
+				findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("\tPerson with surname '%s' was not found.\n", surname);
 				break;
 			case 'd':
 				printf("Delete person with surname: ");
@@ -103,16 +105,20 @@ void main() {
 				break;
 			case 'r':
 				printf("Reading list from file:\n");
-				fileRead();
+				fileRead(&headR);
+				printList(headR.next);
 				break;
 			case '0':
 				// End program
 				break;
 			default:
-				printf("\nInvalid input. Try again.\n");
+				printf("\tInvalid input. Try again.\n");
 				break;
 		}
 	} while (in != '0');
+
+	deleteList(&head);
+	deleteList(&headR);
 
 	return EXIT_SUCCESS;
 }
@@ -209,14 +215,31 @@ int deletePerson(Position p, char* sur)
 	Position temp;
 	temp = (Position)malloc(sizeof(Person));
 
-	// postavlja p na prethodnika elementa kojeg želimo izbrisati
-	while (p->next != NULL && strcmp(p->next->surname, sur))
-		p = p->next;
+	// sets p to predecessor of person we want to delete
+	p = findPersonPrev(p, sur);
 
 	if (p->next != NULL)
 	{
 		temp = p->next;
 		p->next = temp->next;
+		free(temp);
+
+		printf("\tPerson deleted.\n");
+	}
+	else printf("\tPerson with surname '%s' was not found.\n", sur);
+
+	return EXIT_SUCCESS;
+}
+
+// Delete all persons in list
+int deleteList(Position head)
+{
+	Position temp;
+
+	while (head->next != NULL)
+	{
+		temp = head->next;
+		head->next = head->next->next;
 		free(temp);
 	}
 
@@ -229,7 +252,7 @@ int addAfter(Position p, char* sur)
 
 	p = findPerson(p, sur);
 
-	if (p)
+	if (p != NULL)
 	{
 		newPerson = createPerson();
 
@@ -247,7 +270,7 @@ int addBefore(Position p, char* sur)
 
 	p = findPersonPrev(p, sur);
 	
-	if (p)
+	if (p != NULL)
 	{
 		newPerson = createPerson();
 
@@ -259,12 +282,13 @@ int addBefore(Position p, char* sur)
 	return EXIT_SUCCESS;
 }
 
+// Write list content into file
 int fileWrite(Position p)
 {
-	FILE* fp = NULL;
-	fp = fopen("persons.txt", "w");
+	FILE* filePointer = NULL;
+	filePointer = fopen("persons.txt", "w");
 
-	if (fp == NULL)
+	if (filePointer == NULL)
 	{
 		printf("\nFile could not be opened.\n");
 		return FILE_ERROR_OPEN;
@@ -272,18 +296,19 @@ int fileWrite(Position p)
 
 	while (p != NULL)
 	{
-		fprintf(fp, "%s %s, roden(a) %d. godine\n", p->name, p->surname, p->birthYear);
+		fprintf(filePointer, "%s %s %d\n", p->name, p->surname, p->birthYear);
 		p = p->next;
 	}
 
-	fclose(fp);
+	fclose(filePointer);
 
 	printf("\tSuccess!\n");
 
 	return EXIT_SUCCESS;
 }
 
-int fileRead()
+// Reads and prints file content
+int _fileRead()
 {
 	char c;
 	FILE* fp = NULL;
@@ -303,6 +328,41 @@ int fileRead()
 	}
 		
 	fclose(fp);
+
+	return EXIT_SUCCESS;
+}
+
+// Reads and stores file content into list
+int fileRead(Position head)
+{
+	FILE* filePointer = NULL;
+	filePointer = fopen("persons.txt", "r");
+
+	if (filePointer == NULL)
+	{
+		printf("File could not be opened.\n");
+		return FILE_ERROR_OPEN;
+	}
+
+
+	Position prev, current;
+
+	deleteList(head); // so repeated reading won't append file content to previous content
+	prev = head;
+
+	while (!feof(filePointer))
+	{
+		current = (Position)malloc(sizeof(Person)); // pointer to newly read person
+		fscanf(filePointer, " %s %s %d ", current->name, current->surname, &current->birthYear);
+
+		// add new person after previous
+		current->next = prev->next;
+		prev->next = current;
+
+		prev = current; // newly read person will be the previous person in next iteration
+	}
+
+	fclose(filePointer);
 
 	return EXIT_SUCCESS;
 }
