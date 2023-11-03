@@ -42,8 +42,8 @@ Position findPerson(Position, char*);
 int printPerson(Position);
 int deletePerson(Position, char*);
 int deleteList(Position);
-int addAfter(Position, Position);
-int addBefore(Position, Position);
+int addAfter(Position, char*);
+int addBefore(Position, char*);
 int fileWrite(Position);
 int _fileRead();
 int fileRead(Position);
@@ -210,6 +210,7 @@ int printPerson(Position person)
 	return EXIT_SUCCESS;
 }
 
+// ODE NESTO NE RADI KAD BRISEM OSOBU KOJA NE POSTOJI
 int deletePerson(Position head, char* sur)
 {
 	Position temp = NULL, prev = NULL;
