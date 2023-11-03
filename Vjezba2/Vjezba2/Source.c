@@ -1,17 +1,17 @@
-//2. Definirati strukturu osoba(ime, prezime, godina roðenja) i napisati program koji :
-//A.dinamièki dodaje novi element na poèetak liste,
+//2. Definirati strukturu osoba(ime, prezime, godina roÃ°enja) i napisati program koji :
+//A.dinamiÃ¨ki dodaje novi element na poÃ¨etak liste,
 //B.ispisuje listu,
-//C.dinamièki dodaje novi element na kraj liste,
+//C.dinamiÃ¨ki dodaje novi element na kraj liste,
 //D.pronalazi element u listi(po prezimenu),
-//E.briše odreðeni element iz liste,
+//E.briÅ¡e odreÃ°eni element iz liste,
 //U zadatku se ne smiju koristiti globalne varijable.
 
 //3. Prethodnom zadatku dodati funkcije :
-//A.dinamièki dodaje novi element iza odreðenog elementa,
-//B.dinamièki dodaje novi element ispred odreðenog elementa,
+//A.dinamiÃ¨ki dodaje novi element iza odreÃ°enog elementa,
+//B.dinamiÃ¨ki dodaje novi element ispred odreÃ°enog elementa,
 //C.sortira listu po prezimenima osoba, ( OVO NE )
 //D.upisuje listu u datoteku,
-//E.èita listu iz datoteke.
+//E.Ã¨ita listu iz datoteke.
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -125,7 +125,7 @@ void main() {
 
 Position createPerson()
 {
-	Position person;
+	Position person = NULL;
 	person = (Position)malloc(sizeof(Person));
 
 	printf("\tName: ");
@@ -142,7 +142,7 @@ Position createPerson()
 
 int addToFrontOfTheList(Position head)
 {
-	Position newPerson;
+	Position newPerson = NULL;
 	newPerson = createPerson();
 
 	if (newPerson) {
@@ -155,7 +155,7 @@ int addToFrontOfTheList(Position head)
 
 int addToEndOfTheList(Position head)
 {
-	Position newPerson;
+	Position newPerson = NULL;
 	newPerson = createPerson();
 
 	if (newPerson) {
@@ -171,57 +171,55 @@ int addToEndOfTheList(Position head)
 	return EXIT_SUCCESS;
 }
 
-int printList(Position p)
+int printList(Position current)
 {
-	if (!p)
+	if (current == NULL)
 		printf("\tEmpty list!\n");
 
-	while (p != NULL)
+	while (current != NULL)
 	{
-		printPerson(p);
-		p = p->next;
+		printPerson(current);
+		current = current->next;
 	}
 	
 	return EXIT_SUCCESS;
 }
 
-Position findPerson(Position p, char* sur)
+Position findPerson(Position current, char* sur)
 {
-	while (p != NULL && strcmp(p->surname, sur))
-		p = p->next;
+	while (current != NULL && strcmp(current->surname, sur))
+		current = current->next;
 
-	return p;
+	return current;
 }
 
-Position findPersonPrev(Position p, char* sur)
+Position findPersonPrev(Position current, char* sur)
 {
-	while (p->next != NULL && strcmp(p->next->surname, sur))
-		p = p->next;
+	while (current->next != NULL && strcmp(current->next->surname, sur))
+		current = current->next;
 
-	if (p->next == NULL) return NULL;
+	if (current->next == NULL) return NULL;
 
-	return p;
+	return current;
 }
 
-int printPerson(Position p)
+int printPerson(Position person)
 {
-	printf("\t%s %s, roden(a) %d. godine\n", p->name, p->surname, p->birthYear);
+	printf("\t%s %s, roden(a) %d. godine\n", person->name, person->surname, person->birthYear);
 
 	return EXIT_SUCCESS;
 }
 
-int deletePerson(Position p, char* sur)
+int deletePerson(Position head, char* sur)
 {
-	Position temp;
-	temp = (Position)malloc(sizeof(Person));
+	Position temp = NULL, prev = NULL;
 
-	// sets p to predecessor of person we want to delete
-	p = findPersonPrev(p, sur);
+	prev = findPersonPrev(head, sur);
 
-	if (p->next != NULL)
+	if (prev->next != NULL)
 	{
-		temp = p->next;
-		p->next = temp->next;
+		temp = prev->next;
+		prev->next = temp->next;
 		free(temp);
 
 		printf("\tPerson deleted.\n");
@@ -234,7 +232,7 @@ int deletePerson(Position p, char* sur)
 // Delete all persons in list
 int deleteList(Position head)
 {
-	Position temp;
+	Position temp = NULL;
 
 	while (head->next != NULL)
 	{
@@ -246,36 +244,36 @@ int deleteList(Position head)
 	return EXIT_SUCCESS;
 }
 
-int addAfter(Position p, char* sur)
+int addAfter(Position head, char* sur)
 {
-	Position newPerson;
+	Position newPerson = NULL, current = NULL;
 
-	p = findPerson(p, sur);
+	current = findPerson(head, sur);
 
-	if (p != NULL)
+	if (current != NULL)
 	{
 		newPerson = createPerson();
 
-		newPerson->next = p->next;
-		p->next = newPerson;
+		newPerson->next = current->next;
+		current->next = newPerson;
 	}
 	else printf("\tPerson with surname '%s' was not found.\n", sur);
 
 	return EXIT_SUCCESS;
 }
 
-int addBefore(Position p, char* sur)
+int addBefore(Position head, char* sur)
 {
-	Position newPerson;
+	Position newPerson = NULL, prev = NULL;
 
-	p = findPersonPrev(p, sur);
+	prev = findPersonPrev(head, sur);
 	
-	if (p != NULL)
+	if (prev != NULL)
 	{
 		newPerson = createPerson();
 
-		newPerson->next = p->next;
-		p->next = newPerson;
+		newPerson->next = prev->next;
+		prev->next = newPerson;
 	}
 	else printf("\tPerson with surname '%s' was not found.\n", sur);
 	
@@ -283,7 +281,7 @@ int addBefore(Position p, char* sur)
 }
 
 // Write list content into file
-int fileWrite(Position p)
+int fileWrite(Position current)
 {
 	FILE* filePointer = NULL;
 	filePointer = fopen("persons.txt", "w");
@@ -294,10 +292,10 @@ int fileWrite(Position p)
 		return FILE_ERROR_OPEN;
 	}
 
-	while (p != NULL)
+	while (current != NULL)
 	{
-		fprintf(filePointer, "%s %s %d\n", p->name, p->surname, p->birthYear);
-		p = p->next;
+		fprintf(filePointer, "%s %s %d\n", current->name, current->surname, current->birthYear);
+		current = current->next;
 	}
 
 	fclose(filePointer);
@@ -345,7 +343,7 @@ int fileRead(Position head)
 	}
 
 
-	Position prev, current;
+	Position prev = NULL, current = NULL;
 
 	deleteList(head); // so repeated reading won't append file content to previous content
 	prev = head;
