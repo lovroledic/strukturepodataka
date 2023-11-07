@@ -1,2 +1,5 @@
-Tino Tinic 2003
-Zara Zaric 1998
+w w 3
+p p 5
+a a 2
+f f 4
+s s 8

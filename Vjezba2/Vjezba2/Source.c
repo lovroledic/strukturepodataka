@@ -63,7 +63,6 @@ void main() {
 	{
 		printf("\nChoose action: ");
 		scanf(" %c", &in);
-		getchar();
 
 		switch (in)
 		{
@@ -210,14 +209,13 @@ int printPerson(Position person)
 	return EXIT_SUCCESS;
 }
 
-// ODE NESTO NE RADI KAD BRISEM OSOBU KOJA NE POSTOJI
 int deletePerson(Position head, char* sur)
 {
 	Position temp = NULL, prev = NULL;
 
 	prev = findPersonPrev(head, sur);
 
-	if (prev->next != NULL)
+	if (prev != NULL)
 	{
 		temp = prev->next;
 		prev->next = temp->next;
