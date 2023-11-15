@@ -1,3 +1,9 @@
+/*
+Napisati program za zbrajanje i množenje polinoma. Koeficijenti i eksponenti se
+èitaju iz datoteke.
+Napomena: Eksponenti u datoteci nisu nužno sortirani.
+*/
+
 #define _CRT_SECURE_NO_WARNINGS
 
 #include<stdio.h>
@@ -10,6 +16,7 @@
 #define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
 #define MALLOC_ERROR -2
+#define SSCANF_ERROR -3
 
 typedef struct monomial {
 	int coef;
@@ -21,11 +28,17 @@ int strToPoly(Mono*, char*);
 int polyAdd(Mono*, Mono*);
 int printMono(Mono*);
 int printPoly(Mono*);
+int deletePoly(Mono*);
+int polySum(Mono*, Mono*, Mono*);
+int polyMulti(Mono*, Mono*, Mono*);
 
 int main()
 {
 	Mono poly1 = {.coef = 0, .exp = 0, .next = NULL};
 	Mono poly2 = { .coef = 0, .exp = 0, .next = NULL };
+	Mono sum = { .coef = 0, .exp = 0, .next = NULL };
+	Mono multi = { .coef = 0, .exp = 0, .next = NULL };
+
 
 	int i = 0, size = 0;
 	char buffer[MAX_LINE] = { 0 };
@@ -50,11 +63,18 @@ int main()
 	printPoly(poly1.next);
 	printPoly(poly2.next);
 
+	polySum(&sum, poly1.next, poly2.next);
+	printPoly(sum.next);
+
+	polyMulti(&multi, poly1.next, poly2.next);
+	printPoly(multi.next);
 
 	fclose(filePointer);
 
 	deletePoly(&poly1);
 	deletePoly(&poly2);
+	deletePoly(&sum);
+	deletePoly(&multi);
 	
 	return EXIT_SUCCESS;
 }
@@ -65,6 +85,7 @@ int polyAdd(Mono* head, Mono* mono)
 	Mono* prev = head;
 	Mono* temp = NULL;
 
+	// Monomial with coefficient 0 is equal to 0 so there is no need to add in to polynomial
 	if (mono->coef == 0)
 	{
 		free(mono);
@@ -79,6 +100,7 @@ int polyAdd(Mono* head, Mono* mono)
 	if (prev->next != NULL && mono->exp == prev->next->exp)
 	{
 		prev->next->coef += mono->coef;
+		free(mono);
 
 		if (prev->next->coef == 0)
 		{
@@ -101,17 +123,17 @@ int polyAdd(Mono* head, Mono* mono)
 // Convert string of a polynomial into a polynomial
 int strToPoly(Mono* head, char* str)
 {
-	int i = 0, size = 0;
+	int i = 0, size = 0, status = 0;
 	Mono* mono = NULL;
 
 	while (strlen(str) > 0)
 	{
 		mono = (Mono*)malloc(sizeof(Mono));
-
 		if (mono == NULL) return MALLOC_ERROR;
 
 		// %n reads how many characters were read until it was reached
-		sscanf(str, " %dx^%d %n", &mono->coef, &mono->exp, &size);
+		status = sscanf(str, " %dx^%d %n", &mono->coef, &mono->exp, &size);
+		if (status != 2) return SSCANF_ERROR; // %n is not included in sscanf return value
 
 		polyAdd(head, mono);
 
@@ -163,6 +185,64 @@ int deletePoly(Mono* head)
 		temp = head->next;
 		head->next = head->next->next;
 		free(temp);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int polySum(Mono* sum, Mono* poly1, Mono* poly2)
+{
+	Mono* temp = NULL;
+	temp = (Mono*)malloc(sizeof(Mono));
+
+	while (poly1 != NULL )
+	{
+		temp = (Mono*)malloc(sizeof(Mono));
+		if (temp == NULL) return MALLOC_ERROR;
+
+		temp->coef = poly1->coef;
+		temp->exp = poly1->exp;
+
+		polyAdd(sum, temp);
+		poly1 = poly1->next;
+	}
+
+	while (poly2 != NULL)
+	{
+		temp = (Mono*)malloc(sizeof(Mono));
+		if (temp == NULL) return MALLOC_ERROR;
+
+		temp->coef = poly2->coef;
+		temp->exp = poly2->exp;
+
+		polyAdd(sum, temp);
+		poly2 = poly2->next;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int polyMulti(Mono* multi, Mono* poly1, Mono* poly2)
+{
+	Mono* temp = NULL;
+	Mono* poly2first = poly2;
+
+	while (poly1 != NULL)
+	{
+		poly2 = poly2first;
+		while (poly2 != NULL)
+		{
+			temp = (Mono*)malloc(sizeof(Mono));
+			if (temp == NULL) return MALLOC_ERROR;
+
+			temp->coef = poly1->coef * poly2->coef;
+			temp->exp = poly1->exp + poly2->exp;
+
+			polyAdd(multi, temp);
+			poly2 = poly2->next;
+		}
+
+		poly1 = poly1->next;
 	}
 
 	return EXIT_SUCCESS;
