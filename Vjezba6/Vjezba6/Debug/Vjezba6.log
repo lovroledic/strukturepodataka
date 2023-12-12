@@ -1,0 +1,3 @@
+﻿  Source.c
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba6\Vjezba6\Source.c(53,1): warning C4047: 'initializing': 'char' differs in levels of indirection from 'void *'
+  Vjezba6.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba6\Debug\Vjezba6.exe
