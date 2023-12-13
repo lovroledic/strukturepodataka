@@ -25,10 +25,15 @@ typedef struct levelStack {
 
 DirectoryPosition createDirectory(char* directoryName);
 int push(LevelStackPosition, DirectoryPosition);
+int pop(LevelStackPosition);
+int addDirectory(DirectoryPosition, DirectoryPosition);
+int changeDirectory(LevelStackPosition, char*);
+int printDirectory(DirectoryPosition, int);
 
 int main()
 {
 	char input = 0;
+	char directoryName[MAX_LENGTH] = { 0 };
 
 	Directory headDirectory = { .name = {0}, .subdirectoryPosition = NULL, .next = NULL };
 
@@ -46,19 +51,25 @@ int main()
 		switch (input) {
 		case '1':
 			// md - make directory
-
+			printf("md ");
+			scanf(" %s ", directoryName);
+			addDirectory(headLevelStack.next->directoryLevel, createDirectory(directoryName));
 			break;
 		case '2':
 			// cd <dir> - change directory
-
+			printf("cd ");
+			scanf(" %s ", directoryName);
+			changeDirectory(&headLevelStack, directoryName);
 			break;
 		case '3':
 			// cd.. - go to parent directory
-
+			printf("cd..\n");
+			pop(&headLevelStack);
 			break;
 		case '4':
 			// dir - view directory contents
-
+			printf("Printing contents of %s:\n", headLevelStack.next->directoryLevel->name);
+			printDirectory(headLevelStack.next->directoryLevel, 0);
 			break;
 		case '5':
 			// end of program
@@ -113,6 +124,47 @@ int pop(LevelStackPosition headLevelStack) {
 	temp = headLevelStack->next;
 	headLevelStack->next = headLevelStack->next->next;
 	free(temp);
+
+	return 0;
+}
+
+int addDirectory(DirectoryPosition superdirectory, DirectoryPosition subdirectory) {
+
+	subdirectory->next = superdirectory->subdirectoryPosition;
+	superdirectory->subdirectoryPosition = subdirectory;
+
+	return 0;
+}
+
+int changeDirectory(LevelStackPosition headLevelStack, char* directoryName) {
+
+	DirectoryPosition current = headLevelStack->next->directoryLevel->subdirectoryPosition;
+
+	while (current != NULL && strcmp(current->name, directoryName) != 0)
+		current = current->next;
+
+	if (current != NULL)
+		push(headLevelStack, current);
+	else
+		printf("Directory not found.\n");
+
+	return 0;
+}
+
+int printDirectory(DirectoryPosition current, int depth) {
+
+	int i = 0;
+
+	if (current->subdirectoryPosition != NULL) {
+		DirectoryPosition currentSub = current->subdirectoryPosition;
+		while (currentSub != NULL) {
+			for (i = 0; i < depth; i++)
+				printf(" ");
+			printf("%s\n", currentSub->name);
+			printDirectory(currentSub, depth + 1);
+			currentSub = currentSub->next;
+		}
+	}
 
 	return 0;
 }
