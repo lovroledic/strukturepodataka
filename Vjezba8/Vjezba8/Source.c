@@ -13,13 +13,42 @@ typedef struct node {
 
 Position insert(int x, Position root);
 Position search(int x, Position root);
-int printPreorder(Position root);
-int printInorder(Position root);
-int printPostorder(Position root);
+int printPreorder(Position root, int level);
+int printInorder(Position root, int level);
+int printPostorder(Position root, int level);
 
 int main()
 {
 	Position root = NULL;
+
+	root = insert(4, root);
+	root = insert(9, root);
+	root = insert(2, root);
+	root = insert(10, root);
+	root = insert(6, root);
+	root = insert(3, root);
+	root = insert(1, root);
+	root = insert(5, root);
+	root = insert(7, root);
+
+	if (search(6, root))
+		printf("6 je u stablu.\n");
+	else
+		printf("6 nije u stablu.\n");
+
+	if (search(10, root))
+		printf("10 je u stablu.\n");
+	else
+		printf("10 nije u stablu.\n");
+
+	printf("Preorder ispis:\n");
+	printPreorder(root, 0);
+
+	printf("Inorder ispis:\n");
+	printInorder(root, 0);
+
+	printf("Postorder ispis:\n");
+	printPostorder(root, 0);
 
 	return 0;
 }
@@ -39,15 +68,11 @@ Position insert(int x, Position root)
 
 	// Element je manji od root elementa => dodaj ga lijevom djetetu
 	else if (x < root->data)
-	{
-
-	}
+		root->left = insert(x, root->left);
 
 	// Element je veci od root elementa => dodaj ga desnom djetetu
 	else if (x > root->data)
-	{
-
-	}
+		root->right = insert(x, root->right);
 
 	return root;
 }
@@ -56,31 +81,60 @@ Position search(int x, Position root)
 {
 	if (root == NULL) return NULL;
 
-	// Prolazak po binarnom stablu pretrazivanja (lijevo su manji, desno veci elementi...)
+	if (x < root->data)
+		return search(x, root->left);
+
+	else if (x > root->data)
+		return search(x, root->right);
 
 	return root;
 }
 
-int printPreorder(Position root)
+
+// kao za ispis sadrzaja direktorija
+// 1. ispis cvora, 2. rekurzivni ispis lijevog djeteta, 3. rekurzivni ispis desnog djeteta
+int printPreorder(Position root, int level)
 {
-	// kao za ispis sadrzaja direktorija
-	// 1. ispis cvora, 2. rekurzivni ispis lijevog djeteta, 3. rekurzivni ispis desnog djeteta
+	int i = 0;
+
+	for (i; i < level; i++) printf("   ");
+	printf("%d\n", root->data);
+
+	if (root->left != NULL) printPreorder(root->left, level + 1);
+	if (root->right != NULL) printPreorder(root->right, level + 1);
 
 	return 0;
 }
 
-int printInorder(Position root)
+
+// kao za ispis stabla proracuna
+// 1. rekurzivni ispis lijevog djeteta, 2. ispis cvora, 3. rekurzivni ispis desnog djeteta
+int printInorder(Position root, int level)
 {
-	// kao za ispis stabla proracuna
-	// 1. rekurzivni ispis lijevog djeteta, 2. ispis cvora, 3. rekurzivni ispis desnog djeteta
+	int i = 0;
+
+	if (root->left != NULL) printInorder(root->left, level + 1);
+
+	for (i; i < level; i++) printf("   ");
+	printf("%d\n", root->data);
+
+	if (root->right != NULL) printInorder(root->right, level + 1);
 
 	return 0;
 }
 
-int printPostorder(Position root)
+
+// obrnuto od ispisa direktorija
+// 1. rekurzivni ispis lijevog djeteta, 2. rekurzivni ispis desnog djeteta, 3. ispis cvora
+int printPostorder(Position root, int level)
 {
-	// obrnuto od ispisa direktorija
-	// 1. rekurzivni ispis lijevog djeteta, 2. rekurzivni ispis desnog djeteta, 3. ispis cvora
+	int i = 0;
+
+	if (root->left != NULL) printPostorder(root->left, level + 1);
+	if (root->right != NULL) printPostorder(root->right, level + 1);
+
+	for (i; i < level; i++) printf("   ");
+	printf("%d\n", root->data);
 
 	return 0;
 }
