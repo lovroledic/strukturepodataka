@@ -3,23 +3,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node;
-typedef struct node* Position;
-typedef struct node {
+struct treeNode;
+typedef struct treeNode* TreePosition;
+typedef struct treeNode {
 	int data;
-	Position left;
-	Position right;
-} Node;
+	TreePosition left;
+	TreePosition right;
+} TreeNode;
 
-Position insert(int x, Position root);
-Position search(int x, Position root);
-int printPreorder(Position root, int level);
-int printInorder(Position root, int level);
-int printPostorder(Position root, int level);
+struct queueNode;
+typedef struct queueNode* QueuePosition;
+typedef struct queueNode {
+	TreePosition level;
+	QueuePosition next;
+} QueueNode;
+
+TreePosition insert(int x, TreePosition root);
+TreePosition search(int x, TreePosition root);
+int printPreorder(TreePosition root, int level);
+int printInorder(TreePosition root, int level);
+int printPostorder(TreePosition root, int level);
+
+QueuePosition enqueue(QueuePosition rear, TreePosition levelItem);
+TreePosition dequeue(QueuePosition front);
+int printLevelorder(TreePosition root);
 
 int main()
 {
-	Position root = NULL;
+	TreePosition root = NULL;
 
 	root = insert(4, root);
 	root = insert(9, root);
@@ -50,15 +61,18 @@ int main()
 	printf("Postorder ispis:\n");
 	printPostorder(root, 0);
 
+	printf("Levelorder ispis:\n");
+	printLevelorder(root);
+
 	return 0;
 }
 
-Position insert(int x, Position root)
+TreePosition insert(int x, TreePosition root)
 {
 	// Prazno stablo => postavi kao root element
 	if (root == NULL)
 	{
-		root = (Position)malloc(sizeof(Node));
+		root = (TreePosition)malloc(sizeof(TreePosition));
 		if (root == NULL) return NULL;
 
 		root->data = x;
@@ -77,7 +91,7 @@ Position insert(int x, Position root)
 	return root;
 }
 
-Position search(int x, Position root)
+TreePosition search(int x, TreePosition root)
 {
 	if (root == NULL) return NULL;
 
@@ -93,7 +107,7 @@ Position search(int x, Position root)
 
 // kao za ispis sadrzaja direktorija
 // 1. ispis cvora, 2. rekurzivni ispis lijevog djeteta, 3. rekurzivni ispis desnog djeteta
-int printPreorder(Position root, int level)
+int printPreorder(TreePosition root, int level)
 {
 	int i = 0;
 
@@ -109,7 +123,7 @@ int printPreorder(Position root, int level)
 
 // kao za ispis stabla proracuna
 // 1. rekurzivni ispis lijevog djeteta, 2. ispis cvora, 3. rekurzivni ispis desnog djeteta
-int printInorder(Position root, int level)
+int printInorder(TreePosition root, int level)
 {
 	int i = 0;
 
@@ -126,7 +140,7 @@ int printInorder(Position root, int level)
 
 // obrnuto od ispisa direktorija
 // 1. rekurzivni ispis lijevog djeteta, 2. rekurzivni ispis desnog djeteta, 3. ispis cvora
-int printPostorder(Position root, int level)
+int printPostorder(TreePosition root, int level)
 {
 	int i = 0;
 
@@ -135,6 +149,66 @@ int printPostorder(Position root, int level)
 
 	for (i; i < level; i++) printf("   ");
 	printf("%d\n", root->data);
+
+	return 0;
+}
+
+
+QueuePosition enqueue(QueuePosition rear, TreePosition tree)
+{
+	QueuePosition queueNode;
+	queueNode = (QueuePosition)malloc(sizeof(QueuePosition));
+	if (queueNode == NULL) {
+		printf("Malloc error.\n");
+		return NULL;
+	}
+	queueNode->level = tree;
+	printf("enqueue level %d\n", tree->data);
+
+	if (rear == NULL) {
+		queueNode->next = queueNode;
+		return queueNode;
+	}
+
+	queueNode->next = rear->next;
+	rear->next = queueNode;
+	rear = queueNode;
+
+	return queueNode;
+}
+
+TreePosition dequeue(QueuePosition rear)
+{
+	if (rear == NULL) {
+		printf("dequeue empty queue\n");
+		return NULL;
+	}
+
+	QueuePosition front = rear->next;
+	TreePosition levelItem = front->level;
+
+	rear->next = front->next;
+	front->level = NULL;
+	free(front);
+
+	printf("dequeue %d\n", levelItem->data);
+	return levelItem;
+}
+
+int printLevelorder(TreePosition root)
+{
+	QueuePosition rear = enqueue(NULL, root);
+	printf("Test %d\n", rear->level->data);
+
+	if (rear != NULL) printf("ya");
+	while (rear != NULL) {
+		TreePosition treeNode = dequeue(rear);
+		if (treeNode != NULL) {
+			printf("%d\n", treeNode->data);
+			if (treeNode->left != NULL) rear = enqueue(rear, treeNode->left);
+			if (treeNode->right != NULL) rear = enqueue(rear, treeNode->right);
+		}
+	}
 
 	return 0;
 }
