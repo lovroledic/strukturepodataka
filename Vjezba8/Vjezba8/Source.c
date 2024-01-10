@@ -14,9 +14,11 @@ typedef struct treeNode {
 struct queueNode;
 typedef struct queueNode* QueuePosition;
 typedef struct queueNode {
-	TreePosition level;
+	TreePosition treeNode;
 	QueuePosition next;
 } QueueNode;
+
+QueuePosition rear = NULL;
 
 TreePosition insert(int x, TreePosition root);
 TreePosition search(int x, TreePosition root);
@@ -24,8 +26,8 @@ int printPreorder(TreePosition root, int level);
 int printInorder(TreePosition root, int level);
 int printPostorder(TreePosition root, int level);
 
-QueuePosition enqueue(QueuePosition rear, TreePosition levelItem);
-TreePosition dequeue(QueuePosition front);
+QueuePosition enqueue(TreePosition levelItem);
+TreePosition dequeue();
 int printLevelorder(TreePosition root);
 
 int main()
@@ -72,7 +74,7 @@ TreePosition insert(int x, TreePosition root)
 	// Prazno stablo => postavi kao root element
 	if (root == NULL)
 	{
-		root = (TreePosition)malloc(sizeof(TreePosition));
+		root = (TreePosition)malloc(sizeof(TreeNode));
 		if (root == NULL) return NULL;
 
 		root->data = x;
@@ -154,16 +156,15 @@ int printPostorder(TreePosition root, int level)
 }
 
 
-QueuePosition enqueue(QueuePosition rear, TreePosition tree)
+QueuePosition enqueue(TreePosition treeNode)
 {
 	QueuePosition queueNode;
-	queueNode = (QueuePosition)malloc(sizeof(QueuePosition));
+	queueNode = (QueuePosition)malloc(sizeof(QueueNode));
 	if (queueNode == NULL) {
 		printf("Malloc error.\n");
 		return NULL;
 	}
-	queueNode->level = tree;
-	printf("enqueue level %d\n", tree->data);
+	queueNode->treeNode = treeNode;
 
 	if (rear == NULL) {
 		queueNode->next = queueNode;
@@ -177,37 +178,39 @@ QueuePosition enqueue(QueuePosition rear, TreePosition tree)
 	return queueNode;
 }
 
-TreePosition dequeue(QueuePosition rear)
+TreePosition dequeue()
 {
 	if (rear == NULL) {
-		printf("dequeue empty queue\n");
 		return NULL;
 	}
 
-	QueuePosition front = rear->next;
-	TreePosition levelItem = front->level;
+	//QueuePosition front = rear->next;
 
-	rear->next = front->next;
-	front->level = NULL;
-	free(front);
+	TreePosition levelItem;
+	if (rear == rear->next) {
+		levelItem = rear->treeNode;
+		free(rear);
+		rear = NULL;
+	}
+	else {
+		QueuePosition front = rear->next;
+		levelItem = front->treeNode;
+		rear->next = front->next;
+		free(front);
+	}
 
-	printf("dequeue %d\n", levelItem->data);
 	return levelItem;
 }
 
 int printLevelorder(TreePosition root)
 {
-	QueuePosition rear = enqueue(NULL, root);
-	printf("Test %d\n", rear->level->data);
+	rear = enqueue(root);
 
-	if (rear != NULL) printf("ya");
 	while (rear != NULL) {
-		TreePosition treeNode = dequeue(rear);
-		if (treeNode != NULL) {
-			printf("%d\n", treeNode->data);
-			if (treeNode->left != NULL) rear = enqueue(rear, treeNode->left);
-			if (treeNode->right != NULL) rear = enqueue(rear, treeNode->right);
-		}
+		TreePosition treeNode = dequeue();
+		printf("%d ", treeNode->data);
+		if (treeNode->left != NULL) rear = enqueue(treeNode->left);
+		if (treeNode->right != NULL) rear = enqueue(treeNode->right);
 	}
 
 	return 0;
