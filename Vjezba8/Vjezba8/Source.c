@@ -25,10 +25,11 @@ TreePosition search(int x, TreePosition root);
 int printPreorder(TreePosition root, int level);
 int printInorder(TreePosition root, int level);
 int printPostorder(TreePosition root, int level);
-
 QueuePosition enqueue(TreePosition levelItem);
 TreePosition dequeue();
 int printLevelorder(TreePosition root);
+TreePosition findMin(TreePosition root);
+TreePosition deleteElement(TreePosition root, int x);
 
 int main()
 {
@@ -44,15 +45,8 @@ int main()
 	root = insert(5, root);
 	root = insert(7, root);
 
-	if (search(6, root))
-		printf("6 je u stablu.\n");
-	else
-		printf("6 nije u stablu.\n");
-
-	if (search(10, root))
-		printf("10 je u stablu.\n");
-	else
-		printf("10 nije u stablu.\n");
+	search(6, root);
+	search(11, root);
 
 	printf("Preorder ispis:\n");
 	printPreorder(root, 0);
@@ -65,6 +59,11 @@ int main()
 
 	printf("Levelorder ispis:\n");
 	printLevelorder(root);
+
+	root = deleteElement(root, 7);
+	root = deleteElement(root, 6);
+	printf("Preorder ispis nakon brisanja:\n");
+	printPreorder(root, 0);
 
 	return 0;
 }
@@ -95,7 +94,10 @@ TreePosition insert(int x, TreePosition root)
 
 TreePosition search(int x, TreePosition root)
 {
-	if (root == NULL) return NULL;
+	if (root == NULL) {
+		printf("%d not found.\n", x);
+		return NULL;
+	}
 
 	if (x < root->data)
 		return search(x, root->left);
@@ -103,6 +105,7 @@ TreePosition search(int x, TreePosition root)
 	else if (x > root->data)
 		return search(x, root->right);
 
+	printf("%d found!\n", x);
 	return root;
 }
 
@@ -184,8 +187,6 @@ TreePosition dequeue()
 		return NULL;
 	}
 
-	//QueuePosition front = rear->next;
-
 	TreePosition levelItem;
 	if (rear == rear->next) {
 		levelItem = rear->treeNode;
@@ -213,5 +214,43 @@ int printLevelorder(TreePosition root)
 		if (treeNode->right != NULL) rear = enqueue(treeNode->right);
 	}
 
+	printf("\n");
+
 	return 0;
+}
+
+TreePosition findMin(TreePosition root) {
+	if (root->left == NULL) return root;
+	return findMin(root->left);
+}
+
+TreePosition deleteElement(TreePosition root, int x)
+{
+	if (root == NULL) {
+		printf("Element not found.\n");
+		return NULL;
+	}
+
+	if (x < root->data) root->left = deleteElement(root->left, x);
+	else if (x > root->data) root->right = deleteElement(root->right, x);
+
+	// Element pronaðen
+	// Ima dvoje djece
+	else if (root->left != NULL && root->right != NULL) {
+		TreePosition minInRight = findMin(root->right);
+		root->data = minInRight->data;
+		root->right = deleteElement(root->right, root->data);
+	}
+
+	// Ima 0 ili 1 dijete
+	else {
+		TreePosition temp = root;
+
+		if (root->left == NULL) root = root->right; // Nema lijevo dijete (ima samo desno)
+		else root = root->left; // Ima samo lijevo dijete
+
+		free(temp);
+	}
+
+	return root;
 }
