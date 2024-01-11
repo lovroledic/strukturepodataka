@@ -24,8 +24,8 @@ typedef struct _student {
 	double points;
 } Student;
 
-int readNoRowsInFile() {
-
+int readNoRowsInFile()
+{
 	int counter = 0;
 	char buffer[MAX_LINE] = { 0 };
 
@@ -46,13 +46,13 @@ int readNoRowsInFile() {
 	return counter;
 }
 
-int main() {
-	
+int main()
+{
 	int i = 0, noRows = 0;
 	noRows = readNoRowsInFile();
 
-	if (noRows > 0) {
-
+	if (noRows > 0)
+	{
 		FILE* filePointer = NULL;
 		filePointer = fopen("students.txt", "r");
 		if (!filePointer) {
