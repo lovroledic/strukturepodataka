@@ -23,6 +23,8 @@
 #define MAX_SIZE 50
 #define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
+#define MALLOC_ERROR -2
+#define SCANF_ERROR -3
 
 struct _person;
 typedef struct _person* Position;
@@ -37,9 +39,9 @@ typedef struct _person {
 Position createPerson();
 int addToFrontOfTheList(Position);
 int addToEndOfTheList(Position);
+int printPerson(Position);
 int printList(Position);
 Position findPerson(Position, char*);
-int printPerson(Position);
 int deletePerson(Position, char*);
 int deleteList(Position);
 int addAfter(Position, char*);
@@ -50,19 +52,19 @@ int fileRead(Position);
 
 void main() {
 
-	char in;
+	char in = 0;
 	FILE* filePointer = NULL;
 
 	char surname[MAX_SIZE];
 	Person head = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 };
-	Person headR = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 };
+	Person headR = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 }; // for reading from file
 
 	printf("f - add person to front of the list\ne - add person to end of the list\na - add person after person with surname\nb - add person before person with surname\np - print list\ns - find person with surname\nd - delete person with surname\nw - write list into file\nr - read list from file\n");
 
 	do
 	{
 		printf("\nChoose action: ");
-		scanf(" %c", &in);
+		if (scanf(" %c", &in) != 1) return SCANF_ERROR;
 
 		switch (in)
 		{
@@ -76,12 +78,12 @@ void main() {
 				break;
 			case 'a':
 				printf("Add after person with surname: ");
-				scanf(" %s", surname);
+				if (scanf(" %s", surname) != 1) return SCANF_ERROR;
 				addAfter(&head, surname);
 				break;
 			case 'b':
 				printf("Add before person with surname: ");
-				scanf(" %s", surname);
+				if (scanf(" %s", surname) != 1) return SCANF_ERROR;
 				addBefore(&head, surname);
 				break;
 			case 'p':
@@ -90,12 +92,12 @@ void main() {
 				break;
 			case 's':
 				printf("Find person with surname: ");
-				scanf(" %s", surname);
+				if (scanf(" %s", surname) != 1) return SCANF_ERROR;
 				findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("\tPerson with surname '%s' was not found.\n", surname);
 				break;
 			case 'd':
 				printf("Delete person with surname: ");
-				scanf(" %s", surname);
+				if (scanf(" %s", surname) != 1) return SCANF_ERROR;
 				deletePerson(&head, surname);
 				break;
 			case 'w':
@@ -126,15 +128,16 @@ Position createPerson()
 {
 	Position person = NULL;
 	person = (Position)malloc(sizeof(Person));
+	if (!person) return NULL;
 
 	printf("\tName: ");
-	scanf(" %s", person->name);
+	if (scanf(" %s", person->name) != 1) return SCANF_ERROR;
 
 	printf("\tSurname: ");
-	scanf(" %s", person->surname);
+	if (scanf(" %s", person->surname) != 1) return SCANF_ERROR;
 
 	printf("\tBirth year: ");
-	scanf(" %d", &person->birthYear);
+	if (scanf(" %d", &person->birthYear) != 1) return SCANF_ERROR;
 
 	return person;
 }
@@ -143,11 +146,13 @@ int addToFrontOfTheList(Position head)
 {
 	Position newPerson = NULL;
 	newPerson = createPerson();
-
-	if (newPerson) {
-		newPerson->next = head->next;
-		head->next = newPerson;
+	if (!newPerson) {
+		printf("Malloc error!\n");
+		return MALLOC_ERROR;
 	}
+
+	newPerson->next = head->next;
+	head->next = newPerson;
 
 	return EXIT_SUCCESS;
 }
@@ -156,17 +161,23 @@ int addToEndOfTheList(Position head)
 {
 	Position newPerson = NULL;
 	newPerson = createPerson();
-
-	if (newPerson) {
-
-		while (head->next != NULL) {
-			head = head->next;
-		}
-
-		newPerson->next = head->next;
-		head->next = newPerson;
+	if (!newPerson) {
+		printf("Malloc error!\n");
+		return MALLOC_ERROR;
 	}
 
+	while (head->next != NULL)
+		head = head->next;
+
+	newPerson->next = head->next;
+	head->next = newPerson;
+
+	return EXIT_SUCCESS;
+}
+
+int printPerson(Position person)
+{
+	printf("\t%s %s, roden(a) %d. godine\n", person->name, person->surname, person->birthYear);
 	return EXIT_SUCCESS;
 }
 
@@ -175,8 +186,7 @@ int printList(Position current)
 	if (current == NULL)
 		printf("\tEmpty list!\n");
 
-	while (current != NULL)
-	{
+	while (current != NULL) {
 		printPerson(current);
 		current = current->next;
 	}
@@ -202,13 +212,6 @@ Position findPersonPrev(Position current, char* sur)
 	return current;
 }
 
-int printPerson(Position person)
-{
-	printf("\t%s %s, roden(a) %d. godine\n", person->name, person->surname, person->birthYear);
-
-	return EXIT_SUCCESS;
-}
-
 int deletePerson(Position head, char* sur)
 {
 	Position temp = NULL, prev = NULL;
@@ -228,7 +231,6 @@ int deletePerson(Position head, char* sur)
 	return EXIT_SUCCESS;
 }
 
-// Delete all persons in list
 int deleteList(Position head)
 {
 	Position temp = NULL;
@@ -245,16 +247,20 @@ int deleteList(Position head)
 
 int addAfter(Position head, char* sur)
 {
-	Position newPerson = NULL, current = NULL;
+	Position newPerson = NULL, personWithSurname = NULL;
 
-	current = findPerson(head, sur);
+	personWithSurname = findPerson(head, sur);
 
-	if (current != NULL)
+	if (personWithSurname != NULL)
 	{
 		newPerson = createPerson();
+		if (!newPerson) {
+			printf("Malloc error!\n");
+			return MALLOC_ERROR;
+		}
 
-		newPerson->next = current->next;
-		current->next = newPerson;
+		newPerson->next = personWithSurname->next;
+		personWithSurname->next = newPerson;
 	}
 	else printf("\tPerson with surname '%s' was not found.\n", sur);
 
@@ -263,16 +269,20 @@ int addAfter(Position head, char* sur)
 
 int addBefore(Position head, char* sur)
 {
-	Position newPerson = NULL, prev = NULL;
+	Position newPerson = NULL, personBeforeSurname = NULL;
 
-	prev = findPersonPrev(head, sur);
+	personBeforeSurname = findPersonPrev(head, sur);
 	
-	if (prev != NULL)
+	if (personBeforeSurname != NULL)
 	{
 		newPerson = createPerson();
+		if (!newPerson) {
+			printf("Malloc error!\n");
+			return MALLOC_ERROR;
+		}
 
-		newPerson->next = prev->next;
-		prev->next = newPerson;
+		newPerson->next = personBeforeSurname->next;
+		personBeforeSurname->next = newPerson;
 	}
 	else printf("\tPerson with surname '%s' was not found.\n", sur);
 	
@@ -285,14 +295,12 @@ int fileWrite(Position current)
 	FILE* filePointer = NULL;
 	filePointer = fopen("persons.txt", "w");
 
-	if (filePointer == NULL)
-	{
+	if (filePointer == NULL) {
 		printf("\nFile could not be opened.\n");
 		return FILE_ERROR_OPEN;
 	}
 
-	while (current != NULL)
-	{
+	while (current != NULL) {
 		fprintf(filePointer, "%s %s %d\n", current->name, current->surname, current->birthYear);
 		current = current->next;
 	}
@@ -307,19 +315,17 @@ int fileWrite(Position current)
 // Reads and prints file content
 int _fileRead()
 {
-	char c;
+	char c = 0;
 	FILE* fp = NULL;
 	fp = fopen("persons.txt", "r");
 
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		printf("File could not be opened.\n");
 		return FILE_ERROR_OPEN;
 	}
 
 	c = getc(fp);
-	while (c != EOF)
-	{
+	while (c != EOF) {
 		printf("%c", c);
 		c = getc(fp);
 	}
@@ -335,8 +341,7 @@ int fileRead(Position head)
 	FILE* filePointer = NULL;
 	filePointer = fopen("persons.txt", "r");
 
-	if (filePointer == NULL)
-	{
+	if (!filePointer) {
 		printf("File could not be opened.\n");
 		return FILE_ERROR_OPEN;
 	}
@@ -350,7 +355,12 @@ int fileRead(Position head)
 	while (!feof(filePointer))
 	{
 		current = (Position)malloc(sizeof(Person)); // pointer to newly read person
-		fscanf(filePointer, " %s %s %d ", current->name, current->surname, &current->birthYear);
+		if (!current) {
+			printf("Malloc error!\n");
+			return MALLOC_ERROR;
+		}
+		if (fscanf(filePointer, " %s %s %d ", current->name, current->surname, &current->birthYear) != 3)
+			return SCANF_ERROR;
 
 		// add new person after previous
 		current->next = prev->next;

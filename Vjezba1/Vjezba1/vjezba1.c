@@ -15,6 +15,8 @@
 #define MAX_POINTS 15
 #define EXIT_SUCCESS 0
 #define FILE_ERROR_OPEN -1
+#define MALLOC_ERROR -2
+#define SCANF_ERROR -3
 
 typedef struct _student {
 	char name[MAX_SIZE];
@@ -23,13 +25,14 @@ typedef struct _student {
 } Student;
 
 int readNoRowsInFile() {
+
 	int counter = 0;
-	FILE* filePointer = NULL;
 	char buffer[MAX_LINE] = { 0 };
 
+	FILE* filePointer = NULL;
 	filePointer = fopen("students.txt", "r");
 	if (!filePointer) {
-		printf("File is not open!\n");
+		printf("File not opened!\n");
 		return FILE_ERROR_OPEN;
 	}
 
@@ -45,24 +48,28 @@ int readNoRowsInFile() {
 
 int main() {
 	
-	int i, noRows = 0;
+	int i = 0, noRows = 0;
 	noRows = readNoRowsInFile();
 
 	if (noRows > 0) {
 
 		FILE* filePointer = NULL;
 		filePointer = fopen("students.txt", "r");
-
-		Student* stud;
-		stud = (Student*)malloc(noRows * sizeof(Student));
-
-		if (stud == NULL) {
-			printf("Error. File not opened.\n");
+		if (!filePointer) {
+			printf("File not opened!\n");
 			return FILE_ERROR_OPEN;
 		}
 
+		Student* stud = NULL;
+		stud = (Student*)malloc(noRows * sizeof(Student));
+		if (stud == NULL) {
+			printf("Malloc error!\n");
+			return MALLOC_ERROR;
+		}
+
 		for (i = 0; i < noRows; i++) {
-			fscanf(filePointer, " %s %s %lf ", stud[i].name, stud[i].surname, &stud[i].points);
+			if (fscanf(filePointer, " %s %s %lf ", stud[i].name, stud[i].surname, &stud[i].points) != 3)
+				return SCANF_ERROR;
 		}
 
 		for (i = 0; i < noRows; i++) {
