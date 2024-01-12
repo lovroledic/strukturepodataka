@@ -1,2 +1,3 @@
 ﻿  Source.c
-  Vjezba5.vcxproj -> C:\Users\lovro\source\repos\Vjezba5\Debug\Vjezba5.exe
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba5\Vjezba5\Source.c(90,35): warning C4244: 'function': conversion from 'double' to 'float', possible loss of data
+  Vjezba5.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba5\Debug\Vjezba5.exe
