@@ -1,12 +1,15 @@
-/*
-Napisati program koji èita datoteku racuni.txt u kojoj su zapisani nazivi svih datoteka koji
-predstavljaju pojedini raèun. Na poèetku svake datoteke je zapisan datum u kojem vremenu je
-raèun izdat u formatu YYYY-MM-DD. Svaki sljedeæi red u datoteci predstavlja artikl u formatu
-naziv, kolièina, cijena. Potrebno je formirati vezanu listu raèuna sortiranu po datumu. Svaki èvor
-vezane liste sadržava vezanu listu artikala sortiranu po nazivu artikla. Nakon toga potrebno je
-omoguæiti upit kojim æe korisnik saznati koliko je novaca sveukupno potrošeno na specifièni
-artikl u odreðenom vremenskom razdoblju i u kojoj je kolièini isti kupljen.
-*/
+/* Napisati program koji èita datoteku racuni.txt u kojoj su
+zapisani nazivi svih datoteka koji predstavljaju pojedini raèun.
+
+Na poèetku svake datoteke je zapisan datum u kojem vremenu je raèun izdat
+u formatu YYYY-MM-DD. Svaki sljedeæi red u datoteci predstavlja artikl u
+formatu naziv, kolièina, cijena.
+
+Potrebno je formirati vezanu listu raèuna sortiranu po datumu. Svaki èvor
+vezane liste sadržava vezanu listu artikala sortiranu po nazivu artikla.
+Nakon toga potrebno je omoguæiti upit kojim æe korisnik saznati koliko je
+novaca sveukupno potrošeno na specifièni artikl u odreðenom vremenskom
+razdoblju i u kojoj je kolièini isti kupljen. */
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -16,8 +19,10 @@ artikl u odreðenom vremenskom razdoblju i u kojoj je kolièini isti kupljen.
 
 #define MAX_LINE 1024
 
+#define EXIT_SUCCESS 0
 #define FILE_OPEN_ERROR -1
 #define MALLOC_ERROR -2
+#define SCANF_ERROR -3
 
 struct article;
 typedef struct article* ArticlePosition;
@@ -41,49 +46,51 @@ int addReceipt(ReceiptPosition head, ReceiptPosition receipt);
 int readReceipt(char* fileName, ReceiptPosition headReceipt);
 int printArticles(ArticlePosition article);
 int printReceipts(ReceiptPosition receipt);
-int getIncomeOfArticleInPeriod(ReceiptPosition currentReceipt, char* article, char* startDate, char* endDate);
+int getArticleInPeriod(ReceiptPosition currentReceipt, char* article, char* startDate, char* endDate, int* income, int* count);
 int deleteArticles(ArticlePosition articleHead);
 int deleteReceipts(ReceiptPosition receiptHead);
 
 int main()
 {
+	int income = 0, count = 0;
 	char article[100] = { 0 };
 	char startDate[20] = { 0 }, endDate[20] = { 0 };
 	char currReceipt[MAX_LINE] = { 0 };
+	FILE* filePointer = NULL;
 	Receipt headReceipt = {
 		.date = {0},
 		.headArticle = NULL,
 		.next = NULL
 	};
-	FILE* fptr = NULL;
 
-	fptr = fopen("racuni.txt", "r");
-
-	if (fptr == NULL) {
-		printf("Error opening file.\n");
+	filePointer = fopen("racuni.txt", "r");
+	if (filePointer == NULL) {
+		printf("File could not be opened.\n");
 		return FILE_OPEN_ERROR;
 	}
 
-	while (!feof(fptr)) {
-		fscanf(fptr, "%s ", currReceipt);
+	while (!feof(filePointer)) {
+		fgets(currReceipt, MAX_LINE, filePointer);
+		currReceipt[strcspn(currReceipt, "\n")] = 0; // Removes '\n'
 		printf("%s\n", currReceipt);
 		readReceipt(currReceipt, &headReceipt);
 	}
 
 	printReceipts(headReceipt.next);
 
-	printf("Enter article name: ");
-	scanf("%s", article);
+	printf("\nEnter article name: ");
+	if (scanf("%s", article) != 1) return SCANF_ERROR;
 	printf("Enter start date (YYYY-MM-DD): ");
-	scanf("%s", startDate);
+	if (scanf("%s", startDate) != 1) return SCANF_ERROR;
 	printf("Enter end date (YYYY-MM-DD): ");
-	scanf("%s", endDate);
+	if (scanf("%s", endDate) != 1) return SCANF_ERROR;
 
-	printf("Income: %d", getIncomeOfArticleInPeriod(&headReceipt, article, startDate, endDate));
+	getArticleInPeriod(&headReceipt, article, startDate, endDate, &income, &count);
+	printf("Income of %d %s articles: %d\n", count, article, income);
 
 
 	deleteReceipts(&headReceipt);
-	fclose(fptr);
+	fclose(filePointer);
 
 	return 0;
 }
@@ -119,46 +126,48 @@ int readReceipt(char* fileName, ReceiptPosition headReceipt)
 	char dateString[20] = { 0 };
 	char articleString[MAX_LINE] = { 0 };
 	int count = 0;
-	FILE* fptr = NULL;
+	FILE* filePointer = NULL;
 	ReceiptPosition newReceipt = NULL;
 	ArticlePosition newArticle = NULL;
 
-	fptr = fopen(fileName, "r");
-
-	if (fptr == NULL) {
-		printf("Error opening file.\n");
+	filePointer = fopen(fileName, "r");
+	if (filePointer == NULL) {
+		printf("File could not be opened.\n");
 		return FILE_OPEN_ERROR;
 	}
 
 	newReceipt = (ReceiptPosition)malloc(sizeof(Receipt));
 	if (newReceipt == NULL) {
-		printf("Error allocating memory.\n");
+		printf("Malloc error.\n");
 		return MALLOC_ERROR;
 	}
 
-	fscanf(fptr, "%s ", dateString);
+	fgets(dateString, 20, filePointer);
+	dateString[strcspn(dateString, "\n")] = 0;
+
 	strcpy(newReceipt->date, dateString);
 	newReceipt->headArticle.next = NULL;
 
-	while (!feof(fptr)) {
+	while (!feof(filePointer))
+	{
 		newArticle = (ArticlePosition)malloc(sizeof(Article));
 		if (newArticle == NULL) {
-			printf("Error allocating memory.\n");
+			printf("Malloc error.\n");
 			return MALLOC_ERROR;
 		}
 
-		count = fscanf(fptr, "%s %d %d ", newArticle->name, &newArticle->quantity, &newArticle->price);
-		if (count != 3) {
+		if (fscanf(filePointer, "%[^,], %d, %d ", 
+				newArticle->name, &newArticle->quantity, &newArticle->price) != 3) {
 			printf("fscanf error.\n");
-			return -1;
+			return SCANF_ERROR;
 		}
+
 		addArticle(&newReceipt->headArticle, newArticle);
 	}
 
 	addReceipt(headReceipt, newReceipt);
 
-
-	fclose(fptr);
+	fclose(filePointer);
 
 	return 0;
 }
@@ -184,31 +193,33 @@ int printReceipts(ReceiptPosition current)
 	return 0;
 }
 
-int getIncomeOfArticleInPeriod(ReceiptPosition currentReceipt, char* article, char* startDate, char* endDate)
+int getArticleInPeriod(ReceiptPosition currentReceipt, char* article, char* startDate, char* endDate, int* income, int* count)
 {
-	int income = 0;
+	ArticlePosition currentArticle = NULL;
 
 	// Move to first receipt with date equal to or greater than startDate
 	while (currentReceipt != NULL && strcmp(currentReceipt->date, startDate) == -1)
 		currentReceipt = currentReceipt->next;
 
 	while (currentReceipt != NULL && strcmp(currentReceipt->date, endDate) <= 0) {
-		ArticlePosition currentArticle = currentReceipt->headArticle.next;
+		currentArticle = currentReceipt->headArticle.next;
 		while (currentArticle != NULL) {
 			if (strcmp(currentArticle->name, article) == 0) {
-				income += currentArticle->quantity * currentArticle->price;
+				*income += currentArticle->quantity * currentArticle->price;
+				*count += currentArticle->quantity;
 			}
 			currentArticle = currentArticle->next;
 		}
 		currentReceipt = currentReceipt->next;
 	}
 
-	return income;
+	return EXIT_SUCCESS;
 }
+
 
 int deleteArticles(ArticlePosition articleHead)
 {
-	ArticlePosition temp;
+	ArticlePosition temp = NULL;
 
 	while (articleHead->next != NULL) {
 		temp = articleHead->next;
@@ -220,7 +231,7 @@ int deleteArticles(ArticlePosition articleHead)
 }
 int deleteReceipts(ReceiptPosition receiptHead)
 {
-	ReceiptPosition temp;
+	ReceiptPosition temp = NULL;
 
 	while (receiptHead->next != NULL) {
 		temp = receiptHead->next;
