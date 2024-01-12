@@ -50,8 +50,8 @@ int fileWrite(Position);
 int _fileRead();
 int fileRead(Position);
 
-void main() {
-
+void main()
+{
 	char in = 0;
 	FILE* filePointer = NULL;
 
@@ -93,7 +93,8 @@ void main() {
 			case 's':
 				printf("Find person with surname: ");
 				if (scanf(" %s", surname) != 1) return SCANF_ERROR;
-				findPerson(head.next, surname) ? printPerson(findPerson(head.next, surname)) : printf("\tPerson with surname '%s' was not found.\n", surname);
+				findPerson(head.next, surname) ? 
+					printPerson(findPerson(head.next, surname)) : printf("\tPerson with surname '%s' was not found.\n", surname);
 				break;
 			case 'd':
 				printf("Delete person with surname: ");
