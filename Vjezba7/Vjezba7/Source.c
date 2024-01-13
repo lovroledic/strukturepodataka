@@ -6,7 +6,10 @@
 
 #define MAX_LENGTH 50
 
+#define EMPTY_STACK 1
+#define EXIT_SUCCESS 0
 #define MALLOC_ERROR -1
+#define SCANF_ERROR -2
 
 struct directory;
 typedef struct directory* DirectoryPosition;
@@ -34,41 +37,48 @@ int main()
 {
 	char input = 0;
 	char directoryName[MAX_LENGTH] = { 0 };
-
 	Directory headDirectory = { .name = {0}, .subdirectoryPosition = NULL, .next = NULL };
-
-	DirectoryPosition rootDirectory = createDirectory("C:");
-	headDirectory.next = rootDirectory;
-
+	DirectoryPosition rootDirectory = NULL;
 	LevelStack headLevelStack = { .directoryLevel = NULL, .next = NULL };
+	
+	rootDirectory = createDirectory("C:");
+	if (rootDirectory == NULL) return MALLOC_ERROR;
+
+	headDirectory.next = rootDirectory;
 	push(&headLevelStack, rootDirectory);
 
-
+	printf("1 - make directory\n2 - change directory to <dir>\n3 - go to parent directory\n4 - view directory content\n5 - end program\n");
+	
 	do {
-
-		scanf(" %c", &input);
+		printf("Enter command: ");
+		if (scanf(" %c", &input) != 1) return SCANF_ERROR;
 
 		switch (input) {
 		case '1':
 			// md - make directory
 			printf("md ");
-			scanf(" %s ", directoryName);
-			addDirectory(headLevelStack.next->directoryLevel, createDirectory(directoryName));
+			if (scanf(" %s", directoryName) != 1) return SCANF_ERROR;
+
+			DirectoryPosition newDirectory = createDirectory(directoryName);
+			if (newDirectory == NULL) return MALLOC_ERROR;
+			addDirectory(headLevelStack.next->directoryLevel, newDirectory);
+			printf("Created directory %s\n", directoryName);
+
 			break;
 		case '2':
 			// cd <dir> - change directory
 			printf("cd ");
-			scanf(" %s ", directoryName);
+			if (scanf(" %s", directoryName) != 1) return SCANF_ERROR;
 			changeDirectory(&headLevelStack, directoryName);
 			break;
 		case '3':
 			// cd.. - go to parent directory
-			printf("cd..\n");
-			pop(&headLevelStack);
+			if (pop(&headLevelStack)) printf("Already in root directory.\n");
+			else printf("You are now in parent directory\n");
 			break;
 		case '4':
-			// dir - view directory contents
-			printf("Printing contents of %s:\n", headLevelStack.next->directoryLevel->name);
+			// dir - view directory content
+			printf("Printing content of %s:\n", headLevelStack.next->directoryLevel->name);
 			printDirectory(headLevelStack.next->directoryLevel, 0);
 			break;
 		case '5':
@@ -83,6 +93,9 @@ int main()
 	} while (input != '5');
 
 
+	deleteDirectory(&headDirectory);
+	deleteStack(&headLevelStack);
+
 	return 0;
 }
 
@@ -91,11 +104,11 @@ DirectoryPosition createDirectory(char* directoryName) {
 	DirectoryPosition newDirectory = NULL;
 	newDirectory = (DirectoryPosition)malloc(sizeof(Directory));
 
-	if (newDirectory != NULL) {
-		strcpy(newDirectory->name, directoryName);
-		newDirectory->subdirectoryPosition = NULL;
-		newDirectory->next = NULL;
-	}
+	if (newDirectory == NULL) return NULL;
+
+	strcpy(newDirectory->name, directoryName);
+	newDirectory->subdirectoryPosition = NULL;
+	newDirectory->next = NULL;
 
 	return newDirectory;
 }
@@ -112,14 +125,14 @@ int push(LevelStackPosition headLevelStack, DirectoryPosition currentDirectory) 
 	newLevelStack->next = headLevelStack->next;
 	headLevelStack->next = newLevelStack;
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int pop(LevelStackPosition headLevelStack) {
 
 	LevelStackPosition temp;
 
-	if (headLevelStack->next == NULL) return 1; // Stack is empty
+	if (headLevelStack->next == NULL) return EMPTY_STACK; // Stack is empty
 
 	temp = headLevelStack->next;
 	headLevelStack->next = headLevelStack->next->next;
@@ -133,38 +146,66 @@ int addDirectory(DirectoryPosition superdirectory, DirectoryPosition subdirector
 	subdirectory->next = superdirectory->subdirectoryPosition;
 	superdirectory->subdirectoryPosition = subdirectory;
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
+// Goes to child directory with directoryName
 int changeDirectory(LevelStackPosition headLevelStack, char* directoryName) {
 
 	DirectoryPosition current = headLevelStack->next->directoryLevel->subdirectoryPosition;
 
-	while (current != NULL && strcmp(current->name, directoryName) != 0)
-		current = current->next;
+	while (current != NULL && strcmp(current->name, directoryName) != 0) current = current->next;
 
-	if (current != NULL)
+	if (current != NULL) {
+		printf("Changed directory to %s\n", directoryName);
 		push(headLevelStack, current);
-	else
-		printf("Directory not found.\n");
+	}
+	else printf("Directory not found.\n");
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int printDirectory(DirectoryPosition current, int depth) {
 
 	int i = 0;
+	DirectoryPosition currentSubdirectory = NULL;
 
 	if (current->subdirectoryPosition != NULL) {
-		DirectoryPosition currentSub = current->subdirectoryPosition;
-		while (currentSub != NULL) {
+		currentSubdirectory = current->subdirectoryPosition;
+		while (currentSubdirectory != NULL) {
 			for (i = 0; i < depth; i++)
 				printf(" ");
-			printf("%s\n", currentSub->name);
-			printDirectory(currentSub, depth + 1);
-			currentSub = currentSub->next;
+			printf("%s\n", currentSubdirectory->name);
+			printDirectory(currentSubdirectory, depth + 1);
+			currentSubdirectory = currentSubdirectory->next;
 		}
 	}
 
 	return 0;
+}
+
+int deleteDirectory(DirectoryPosition headDirectory) {
+
+	DirectoryPosition temp = NULL;
+
+	while (headDirectory->next != NULL) {
+		temp = headDirectory->next;
+		headDirectory->next = temp->next;
+		free(temp);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int deleteStack(LevelStackPosition headLevelStack) {
+
+	LevelStackPosition temp = NULL;
+
+	while (headLevelStack->next != NULL) {
+		temp = headLevelStack->next;
+		headLevelStack->next = temp->next;
+		free(temp);
+	}
+
+	return EXIT_SUCCESS;
 }

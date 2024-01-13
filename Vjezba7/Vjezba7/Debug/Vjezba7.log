@@ -1,2 +1,4 @@
 ﻿  Source.c
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba7\Vjezba7\Source.c(96,17): warning C4013: 'deleteDirectory' undefined; assuming extern returning int
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba7\Vjezba7\Source.c(97,13): warning C4013: 'deleteStack' undefined; assuming extern returning int
   Vjezba7.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba7\Debug\Vjezba7.exe
