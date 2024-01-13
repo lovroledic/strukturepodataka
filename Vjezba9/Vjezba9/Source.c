@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define EXIT_SUCCESS 0
+#define FILE_OPEN_ERROR -1
+#define MALLOC_ERROR -2
+
 struct node;
 typedef struct node* Position;
 typedef struct node {
@@ -15,6 +19,7 @@ typedef struct node {
 Position insert(Position root, int x);
 int replace(Position root);
 int writeInorderToFile(Position root, int level, FILE* filePointer);
+int deleteTree(Position root);
 
 int main() 
 {
@@ -22,16 +27,19 @@ int main()
 
 	FILE* filePointer = NULL;
 	filePointer = fopen("inorder.txt", "w");
-
 	if (filePointer == NULL) {
 		printf("File could not be opened.\n");
-		return -1;
+		return FILE_OPEN_ERROR;
 	}
 
 	int i = 0;
 	Position root = NULL;
 	for (i = 0; i < 10; i++) {
 		root = insert(root, rand() % (91 - 10) + 10);
+		if (root == NULL) {
+			printf("Malloc error.\n");
+			return MALLOC_ERROR;
+		}
 	}
 
 	fprintf(filePointer, "Originalno stablo:\n");
@@ -41,6 +49,7 @@ int main()
 	writeInorderToFile(root, 0, filePointer);
 
 	fclose(filePointer);
+	deleteTree(root);
 
 	return 0;
 }
@@ -48,8 +57,10 @@ int main()
 Position insert(Position root, int x)
 {
 	if (root == NULL) {
+
 		root = (Position)malloc(sizeof(Node));
 		if (root == NULL) return NULL;
+
 		root->data = x;
 		root->left = NULL;
 		root->right = NULL;
@@ -87,4 +98,15 @@ int writeInorderToFile(Position root, int level, FILE* filePointer)
 	if (root->right != NULL) writeInorderToFile(root->right, level + 1, filePointer);
 
 	return 0;
+}
+
+int deleteTree(Position root) {
+
+	if (root == NULL) return EXIT_SUCCESS;
+
+	deleteTree(root->left);
+	deleteTree(root->right);
+	free(root);
+
+	return EXIT_SUCCESS;
 }
