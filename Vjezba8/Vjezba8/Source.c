@@ -1,7 +1,16 @@
+/*
+Napisati program koji omoguæava rad s binarnim stablom pretraživanja. Treba
+omoguæiti unošenje novog elementa u stablo, ispis elemenata (inorder, preorder, postorder i
+level order), brisanje i pronalaženje nekog elementa.
+*/
+
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#define EXIT_SUCCESS 0
+#define MALLOC_ERROR -1
 
 struct treeNode;
 typedef struct treeNode* TreePosition;
@@ -30,6 +39,7 @@ TreePosition dequeue();
 int printLevelorder(TreePosition root);
 TreePosition findMin(TreePosition root);
 TreePosition deleteElement(TreePosition root, int x);
+int deleteTree(TreePosition root);
 
 int main()
 {
@@ -65,7 +75,9 @@ int main()
 	printf("Preorder ispis nakon brisanja:\n");
 	printPreorder(root, 0);
 
-	return 0;
+	deleteTree(root);
+
+	return EXIT_SUCCESS;
 }
 
 TreePosition insert(int x, TreePosition root)
@@ -74,7 +86,10 @@ TreePosition insert(int x, TreePosition root)
 	if (root == NULL)
 	{
 		root = (TreePosition)malloc(sizeof(TreeNode));
-		if (root == NULL) return NULL;
+		if (root == NULL) {
+			printf("Malloc error.\n"); 
+			return NULL;
+		}
 
 		root->data = x;
 		root->left = NULL;
@@ -207,6 +222,8 @@ int printLevelorder(TreePosition root)
 {
 	rear = enqueue(root);
 
+	if (rear == NULL) return MALLOC_ERROR;
+
 	while (rear != NULL) {
 		TreePosition treeNode = dequeue();
 		printf("%d ", treeNode->data);
@@ -253,4 +270,15 @@ TreePosition deleteElement(TreePosition root, int x)
 	}
 
 	return root;
+}
+
+int deleteTree(TreePosition root) {
+
+	if (root == NULL) return EXIT_SUCCESS;
+
+	deleteTree(root->left);
+	deleteTree(root->right);
+	free(root);
+
+	return EXIT_SUCCESS;
 }

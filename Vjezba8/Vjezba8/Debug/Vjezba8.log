@@ -1,2 +1,3 @@
 ﻿  Source.c
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba8\Vjezba8\Source.c(81,13): warning C4013: 'deleteQueue' undefined; assuming extern returning int
   Vjezba8.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba8\Debug\Vjezba8.exe
