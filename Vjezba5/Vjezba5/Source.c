@@ -25,39 +25,8 @@ typedef struct {
 	StackItem* top;
 } Stack;
 
-int push(Stack* stack, float x)
-{
-	StackItem* item = NULL;
-	item = (StackItem*)malloc(sizeof(StackItem));
-	if (item == NULL) {
-		printf("Malloc error!\n");
-		return MALLOC_ERROR;
-	}
-
-	item->value = x;
-
-	item->next = stack->top;
-	stack->top = item;
-
-	return EXIT_SUCCESS;
-}
-
-int pop(Stack* stack, float* x)
-{
-	StackItem* top;
-	top = stack->top;
-	if (top == NULL) {
-		printf("Trying to read from empty stack.\n");
-		return EMPTY_STACK;
-	}
-
-	*x = top->value;
-
-	stack->top = top->next;
-	free(top);
-
-	return EXIT_SUCCESS;
-}
+int push(Stack* stack, float x);
+int pop(Stack* stack, float* x);
 
 int main()
 {
@@ -127,4 +96,38 @@ int main()
 	printf("Result: %g\n", result);
 
 	return 0;
+}
+
+int push(Stack* stack, float x)
+{
+	StackItem* item = NULL;
+	item = (StackItem*)malloc(sizeof(StackItem));
+	if (item == NULL) {
+		printf("Malloc error!\n");
+		return MALLOC_ERROR;
+	}
+
+	item->value = x;
+
+	item->next = stack->top;
+	stack->top = item;
+
+	return EXIT_SUCCESS;
+}
+
+int pop(Stack* stack, float* x)
+{
+	StackItem* top;
+	top = stack->top;
+	if (top == NULL) {
+		printf("Trying to read from empty stack.\n");
+		return EMPTY_STACK;
+	}
+
+	*x = top->value;
+
+	stack->top = top->next;
+	free(top);
+
+	return EXIT_SUCCESS;
 }
