@@ -2,4 +2,4 @@ Hrvatska, hrvatska.txt
 Francuska, francuska.txt
 Japan, japan.txt
 Brazil, brazil.txt
-Slovaèka, slovacka.txt
+Slovacka, slovacka.txt
