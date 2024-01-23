@@ -1,0 +1,4 @@
+﻿  Source.c
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba11\Vjezba11\Source.c(208,31): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
+C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba11\Vjezba11\Source.c(214): warning C4715: 'printCitiesWithGreaterPopulation': not all control paths return a value
+  Vjezba11.vcxproj -> C:\Users\lovro\Dokumenti\strukturepodataka\Vjezba11\Debug\Vjezba11.exe
